@@ -1,9 +1,15 @@
 {% extends "base.html" %}
+{% block title %}글쓰기 · 게시판{% endblock %}
 {% block content %}
-<h2>글쓰기</h2>
-<form method="post">
-  <input name="title" placeholder="제목" required maxlength="100">
-  <textarea name="body" required></textarea>
-  <button>등록</button>
-</form>
+<a class="back-link" href="{{ url_for('posts.index') }}">← 목록으로</a>
+<section class="page-heading"><div><p class="eyebrow">NEW POST</p><h1>글쓰기</h1><p class="description">제목과 내용을 입력해 주세요.</p></div></section>
+<section class="editor-panel">
+  <form method="post">
+    <label for="title">제목 <span class="label-hint">최대 100자</span></label>
+    <input id="title" name="title" placeholder="제목을 입력하세요" required maxlength="100" value="{{ request.form.get('title', '') }}">
+    <label for="body">내용</label>
+    <textarea id="body" name="body" placeholder="내용을 입력하세요" required rows="12">{{ request.form.get('body', '') }}</textarea>
+    <div class="form-actions"><a class="button secondary" href="{{ url_for('posts.index') }}">취소</a><button class="button" type="submit">등록하기</button></div>
+  </form>
+</section>
 {% endblock %}

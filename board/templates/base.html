@@ -1,24 +1,32 @@
 <!doctype html>
 <html lang="ko">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>게시판</title>
-<style>
-  body{max-width:720px;margin:2rem auto;padding:0 1rem;font-family:sans-serif}
-  input,textarea{width:100%;box-sizing:border-box;margin:.3rem 0;padding:.4rem}textarea{height:10rem}
-  .err{color:#c00}nav{display:flex;gap:1rem;border-bottom:1px solid #ccc;padding-bottom:.5rem}
-  pre{white-space:pre-wrap;font-family:inherit}
-</style>
-<nav>
-  <a href="{{ url_for('posts.index') }}">목록</a>
-  {% if session.uid %}
-    <a href="{{ url_for('posts.write') }}">글쓰기</a>
-    <span style="margin-left:auto">{{ session.name }} <a href="{{ url_for('auth.logout') }}">로그아웃</a></span>
-  {% else %}
-    <a href="{{ url_for('auth.login') }}" style="margin-left:auto">로그인</a>
-    <a href="{{ url_for('auth.register') }}">회원가입</a>
-  {% endif %}
-</nav>
-{% if error %}<p class="err">{{ error }}</p>{% endif %}
-{% block content %}{% endblock %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}게시판{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='board.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="{{ url_for('posts.index') }}">게시판<span class="title-dot"></span></a>
+      <nav aria-label="주 메뉴">
+        <a class="nav-link {% if request.endpoint == 'posts.index' %}active{% endif %}" href="{{ url_for('posts.index') }}">목록</a>
+        {% if session.uid %}
+          <a class="nav-link {% if request.endpoint == 'posts.write' %}active{% endif %}" href="{{ url_for('posts.write') }}">글쓰기</a>
+          <span class="user-name">{{ session.name }}</span>
+          <a class="nav-link" href="{{ url_for('auth.logout') }}">로그아웃</a>
+        {% else %}
+          <a class="nav-link" href="{{ url_for('auth.login') }}">로그인</a>
+          <a class="nav-link" href="{{ url_for('auth.register') }}">회원가입</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    {% if error %}<div class="error-message" role="alert">{{ error }}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer"><div>게시판<span>KT cloud TECH UP</span></div></footer>
+</body>
 </html>

@@ -1,11 +1,109 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>게시글</h2>
-<ul>
-  {% for p in posts %}
-    <li><a href="{{ url_for('posts.post', pid=p.id) }}">{{ p.title }}</a> — {{ p.username }}, {{ p.created }}</li>
-  {% else %}
-    <li>글이 없습니다.</li>
-  {% endfor %}
-</ul>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">BOARD</p>
+    <h1>게시글 목록</h1>
+    <p class="description">등록된 게시글을 확인하세요.</p>
+  </div>
+
+  {% if session.uid %}
+  <a class="button" href="{{ url_for('posts.write') }}">
+    글쓰기 ＋
+  </a>
+  {% endif %}
+</section>
+
+<form
+  class="search-form"
+  method="get"
+  action="{{ url_for('posts.index') }}"
+  role="search"
+>
+  <label for="search-query">제목·내용 검색</label>
+
+  <div class="search-controls">
+    <input
+      id="search-query"
+      type="search"
+      name="q"
+      value="{{ keyword or '' }}"
+      placeholder="검색어를 입력하세요"
+      maxlength="100"
+    >
+
+    <button class="button" type="submit">검색</button>
+
+    {% if keyword %}
+    <a
+      class="button secondary"
+      href="{{ url_for('posts.index') }}"
+    >
+      초기화
+    </a>
+    {% endif %}
+  </div>
+</form>
+
+{% if keyword and not error %}
+<p class="search-summary">
+  ‘{{ keyword }}’ 검색 결과
+  <strong>{{ posts|length }}</strong>건
+</p>
+{% endif %}
+
+<section class="board-panel" aria-label="게시글 목록">
+  <div class="table-caption">
+    <span>{{ "검색 결과" if keyword else "전체 게시글" }}</span>
+    <span class="subtle">최신 등록순</span>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="number">번호</th>
+          <th>제목</th>
+          <th class="author">작성자</th>
+          <th class="date">작성일</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for p in posts %}
+        <tr>
+          <td class="number subtle">{{ p.id }}</td>
+
+          <td class="post-title">
+            <a href="{{ url_for('posts.post', pid=p.id) }}">
+              {{ p.title }}
+            </a>
+          </td>
+
+          <td class="author">{{ p.username }}</td>
+
+          <td class="date subtle">
+            {{ p.created.strftime('%Y.%m.%d %H:%M') if p.created else '-' }}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4">
+            <div class="empty-state">
+              {% if keyword %}
+              <h2>검색 결과가 없습니다.</h2>
+              <p>다른 검색어를 입력해 보세요.</p>
+              {% else %}
+              <h2>아직 게시글이 없습니다.</h2>
+              <p>첫 번째 글을 남겨보세요.</p>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

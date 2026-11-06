@@ -8,12 +8,48 @@ bp = Blueprint("posts", __name__)
 
 @bp.route("/")
 def index():
-    posts = db.query(
-        "SELECT p.id, p.title, p.created, u.username FROM posts p JOIN users u ON u.id=p.user_id ORDER BY p.id DESC"
+    keyword = request.args.get("q", "").strip()
+
+    if len(keyword) > 100:
+        return render_template(
+            "index.html",
+            posts=[],
+            keyword=keyword,
+            error="검색어는 100자 이하로 입력해 주세요.",
+        ), 400
+
+    sql = """
+        SELECT p.id, p.title, p.created, u.username
+        FROM posts p
+        JOIN users u ON u.id = p.user_id
+    """
+    args = ()
+
+    if keyword:
+        escaped = (
+            keyword.replace("=", "==")
+            .replace("%", "=%")
+            .replace("_", "=_")
+        )
+        pattern = f"%{escaped}%"
+
+        sql += """
+            WHERE (
+                p.title LIKE %s ESCAPE '='
+                OR p.body LIKE %s ESCAPE '='
+            )
+        """
+        args = (pattern, pattern)
+
+    sql += " ORDER BY p.id DESC"
+
+    posts = db.query(sql, args)
+    return render_template(
+        "index.html",
+        posts=posts,
+        keyword=keyword,
     )
-    return render_template("index.html", posts=posts)
-
-
+    
 @bp.route("/write", methods=["GET", "POST"])
 @login_required
 def write():
