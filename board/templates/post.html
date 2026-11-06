@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ p.title }}</h2>
+<p>{{ p.username }} · {{ p.created }}</p>
+{# VULN: Stored XSS (본문을 이스케이프 없이 출력) #}
+<pre>{{ p.body|safe }}</pre>
+{% if session.uid == p.user_id %}
+  <form method="post" action="{{ url_for('posts.delete', pid=p.id) }}"><button>삭제</button></form>
+{% endif %}
+{% endblock %}

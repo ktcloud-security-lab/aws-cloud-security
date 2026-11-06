@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>게시글</h2>
+<ul>
+  {% for p in posts %}
+    <li><a href="{{ url_for('posts.post', pid=p.id) }}">{{ p.title }}</a> — {{ p.username }}, {{ p.created }}</li>
+  {% else %}
+    <li>글이 없습니다.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

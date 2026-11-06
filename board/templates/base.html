@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>게시판</title>
+<style>
+  body{max-width:720px;margin:2rem auto;padding:0 1rem;font-family:sans-serif}
+  input,textarea{width:100%;box-sizing:border-box;margin:.3rem 0;padding:.4rem}textarea{height:10rem}
+  .err{color:#c00}nav{display:flex;gap:1rem;border-bottom:1px solid #ccc;padding-bottom:.5rem}
+  pre{white-space:pre-wrap;font-family:inherit}
+</style>
+<nav>
+  <a href="{{ url_for('posts.index') }}">목록</a>
+  {% if session.uid %}
+    <a href="{{ url_for('posts.write') }}">글쓰기</a>
+    <span style="margin-left:auto">{{ session.name }} <a href="{{ url_for('auth.logout') }}">로그아웃</a></span>
+  {% else %}
+    <a href="{{ url_for('auth.login') }}" style="margin-left:auto">로그인</a>
+    <a href="{{ url_for('auth.register') }}">회원가입</a>
+  {% endif %}
+</nav>
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+{% block content %}{% endblock %}
+</html>
