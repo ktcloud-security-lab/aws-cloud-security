@@ -1,17 +1,124 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} · 게시판{% endblock %}
+
 {% block content %}
 <section class="auth-panel">
   <p class="eyebrow">{{ 'WELCOME BACK' if title == '로그인' else 'GET STARTED' }}</p>
   <h1>{{ title }}</h1>
   <p class="description">{{ '계정으로 로그인해 게시글을 작성하세요.' if title == '로그인' else '게시판에서 사용할 계정을 만들어 주세요.' }}</p>
-  <form method="post">
+
+  <form method="post" id="auth-form">
     <label for="username">아이디</label>
-    <input id="username" name="username" placeholder="아이디를 입력하세요" required maxlength="30" autocomplete="username" value="{{ request.form.get('username', '') }}">
+    <input
+      id="username"
+      name="username"
+      placeholder="아이디를 입력하세요"
+      required
+      maxlength="30"
+      autocomplete="username"
+      value="{{ request.form.get('username', '') }}"
+    >
+
     <label for="password">비밀번호</label>
-    <input id="password" name="password" type="password" placeholder="비밀번호를 입력하세요" required minlength="4" autocomplete="{{ 'current-password' if title == '로그인' else 'new-password' }}">
+    <input
+      id="password"
+      name="password"
+      type="password"
+      placeholder="비밀번호를 입력하세요"
+      required
+      minlength="{{ 8 if title == '회원가입' else 4 }}"
+      autocomplete="{{ 'current-password' if title == '로그인' else 'new-password' }}"
+    >
+
+    {% if title == '회원가입' %}
+    <div id="password-rules" aria-live="polite" style="font-size:13px; margin:10px 0 18px;">
+      <p id="rule-length" style="margin:5px 0; color:#777;">○ 8자 이상</p>
+      <p id="rule-letter" style="margin:5px 0; color:#777;">○ 영문 포함</p>
+      <p id="rule-number" style="margin:5px 0; color:#777;">○ 숫자 포함</p>
+      <p id="rule-special" style="margin:5px 0; color:#777;">○ 특수문자 포함</p>
+    </div>
+
+    <label for="password_confirm">비밀번호 확인</label>
+    <input
+      id="password_confirm"
+      name="password_confirm"
+      type="password"
+      placeholder="비밀번호를 다시 입력하세요"
+      required
+      autocomplete="new-password"
+    >
+    <p id="match-message" aria-live="polite" style="font-size:13px; margin:8px 0 18px;"></p>
+    {% endif %}
+
     <button class="button full" type="submit">{{ title }}</button>
   </form>
-  <p class="auth-switch">{% if title == '로그인' %}계정이 없으신가요? <a href="{{ url_for('auth.register') }}">회원가입</a>{% else %}이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a>{% endif %}</p>
+
+  <p class="auth-switch">
+    {% if title == '로그인' %}
+      계정이 없으신가요?
+      <a href="{{ url_for('auth.register') }}">회원가입</a>
+    {% else %}
+      이미 계정이 있으신가요?
+      <a href="{{ url_for('auth.login') }}">로그인</a>
+    {% endif %}
+  </p>
 </section>
+
+{% if title == '회원가입' %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("auth-form");
+  const password = document.getElementById("password");
+  const confirmPassword = document.getElementById("password_confirm");
+  const matchMessage = document.getElementById("match-message");
+
+  const rules = [
+    ["rule-length", "8자 이상", value => value.length >= 8],
+    ["rule-letter", "영문 포함", value => /[A-Za-z]/.test(value)],
+    ["rule-number", "숫자 포함", value => /[0-9]/.test(value)],
+    ["rule-special", "특수문자 포함", value => /[^A-Za-z0-9]/.test(value)]
+  ];
+
+  function validatePassword() {
+    const value = password.value;
+
+    rules.forEach(([id, label, test]) => {
+      const element = document.getElementById(id);
+      const passed = test(value);
+
+      element.textContent = (passed ? "✔ " : "✖ ") + label;
+      element.style.color = passed ? "#16803c" : "#c2410c";
+    });
+
+    if (!confirmPassword.value) {
+      matchMessage.textContent = "";
+      return;
+    }
+
+    const matched = value === confirmPassword.value;
+
+    matchMessage.textContent = matched
+      ? "✔ 비밀번호가 일치합니다."
+      : "✖ 비밀번호가 일치하지 않습니다.";
+
+    matchMessage.style.color = matched ? "#16803c" : "#c2410c";
+  }
+
+  password.addEventListener("input", validatePassword);
+  confirmPassword.addEventListener("input", validatePassword);
+
+  form.addEventListener("submit", function (event) {
+    const value = password.value;
+    const validRules = rules.every(([, , test]) => test(value));
+    const validMatch = value === confirmPassword.value;
+
+    if (!validRules || !validMatch) {
+      event.preventDefault();
+      validatePassword();
+      alert("비밀번호 조건과 비밀번호 확인을 다시 확인해 주세요.");
+    }
+  });
+});
+</script>
+{% endif %}
 {% endblock %}
