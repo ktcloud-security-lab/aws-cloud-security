@@ -12,4 +12,28 @@
     {% if session.uid == p.user_id %}<form method="post" action="{{ url_for('posts.delete', pid=p.id) }}"><button class="button danger" type="submit">삭제</button></form>{% endif %}
   </div>
 </article>
+<section class="article-panel" style="margin-top:20px; padding:25px;">
+  <h2 style="font-size:18px; margin-bottom:15px;">댓글</h2>
+
+  {% for c in comments %}
+    <div style="border-top:1px solid #eee; padding:12px 0;">
+      <strong>{{ c.username }}</strong>
+      <span style="color:#999; font-size:12px; margin-left:8px;">{{ c.created.strftime('%Y.%m.%d %H:%M') if c.created else '' }}</span>
+      {% if session.uid == c.user_id %}
+      <form method="post" action="{{ url_for('posts.comment_delete', cid=c.id) }}" style="display:inline; margin-left:8px;">
+        <input type="hidden" name="pid" value="{{ p.id }}">
+        <button type="submit" style="font-size:10px; color:#b54e45; background:none; border:none; cursor:pointer;">삭제</button>
+      </form>
+      {% endif %}
+      <p style="margin:5px 0;">{{ c.body }}</p>
+    </div>
+  {% endfor %}
+
+  {% if session.uid %}
+  <form method="post" action="{{ url_for('posts.comment', pid=p.id) }}" style="margin-top:15px;">
+    <textarea name="body" placeholder="댓글을 남겨보세요!" style="width:100%; min-height:60px;"></textarea>
+    <button class="button" type="submit" style="margin-top:10px;">등록</button>
+  </form>
+  {% endif %}
+</section>
 {% endblock %}
