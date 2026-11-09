@@ -49,7 +49,8 @@ def index():
         posts=posts,
         keyword=keyword,
     )
-    
+
+
 @bp.route("/write", methods=["GET", "POST"])
 @login_required
 def write():
@@ -68,12 +69,31 @@ def post(pid):
     p = db.query(
         "SELECT p.*, u.username FROM posts p JOIN users u ON u.id=p.user_id WHERE p.id=%s", (pid,), one=True
     ) or abort(404)
-    return render_template("post.html", p=p)
+    comments = db.query(
+        "SELECT c.*, u.username FROM comments c JOIN users u ON u.id=c.user_id WHERE c.post_id=%s ORDER BY c.id", (pid,)
+    )
+    return render_template("post.html", p=p, comments=comments)
 
 
 @bp.route("/post/<int:pid>/delete", methods=["POST"])
 @login_required
 def delete(pid):
-    # 작성자 본인 글만 삭제 (WHERE 조건에 user_id 포함)
     db.execute("DELETE FROM posts WHERE id=%s AND user_id=%s", (pid, session["uid"]))
     return redirect(url_for("posts.index"))
+
+
+@bp.route("/post/<int:pid>/comment", methods=["POST"])
+@login_required
+def comment(pid):
+    body = request.form["body"].strip()
+    if body:
+        db.execute("INSERT INTO comments (post_id, user_id, body) VALUES (%s, %s, %s)", (pid, session["uid"], body))
+    return redirect(url_for("posts.post", pid=pid))
+
+
+@bp.route("/comment/<int:cid>/delete", methods=["POST"])
+@login_required
+def comment_delete(cid):
+    db.execute("DELETE FROM comments WHERE id=%s AND user_id=%s", (cid, session["uid"]))
+    pid = request.form.get("pid")
+    return redirect(url_for("posts.post", pid=pid))
