@@ -19,7 +19,8 @@ def index():
         ), 400
 
     sql = """
-        SELECT p.id, p.title, p.created, u.username
+        SELECT p.id, p.title, p.created, u.username,
+               (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) AS comment_count
         FROM posts p
         JOIN users u ON u.id = p.user_id
     """

@@ -77,7 +77,7 @@
 
           <td class="post-title">
             <a href="{{ url_for('posts.post', pid=p.id) }}">
-              {{ p.title }}
+              {{ p.title }}{% if p.comment_count %} <span style="color:#ee851e; font-size:12px;">[{{ p.comment_count }}]</span>{% endif %}
             </a>
           </td>
 
