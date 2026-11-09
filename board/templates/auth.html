@@ -8,6 +8,7 @@
   <p class="description">{{ '계정으로 로그인해 게시글을 작성하세요.' if title == '로그인' else '게시판에서 사용할 계정을 만들어 주세요.' }}</p>
 
   <form method="post" id="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
     <label for="username">아이디</label>
     <input
       id="username"
@@ -18,7 +19,12 @@
       autocomplete="username"
       value="{{ request.form.get('username', '') }}"
     >
-
+    {% if title == '회원가입' %}
+    <label for="email">이메일</label>
+    <input id="email" name="email" type="email" maxlength="254"
+          required autocomplete="email"
+          value="{{ request.form.get('email', '') }}">
+    {% endif %}
     <label for="password">비밀번호</label>
     <input
       id="password"
@@ -52,6 +58,12 @@
 
     <button class="button full" type="submit">{{ title }}</button>
   </form>
+  {% if title == '로그인' %}
+  <p class="auth-switch">
+    <a href="{{ url_for('auth.forgot_password') }}">비밀번호 찾기</a> ·
+    <a href="{{ url_for('auth.resend_verification') }}">인증 메일 재발송</a>
+  </p>
+  {% endif %}
 
   <p class="auth-switch">
     {% if title == '로그인' %}

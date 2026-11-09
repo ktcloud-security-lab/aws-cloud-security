@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · 게시판{% endblock %}
+{% block content %}
+<section class="auth-panel">
+  <p class="eyebrow">ACCOUNT SUPPORT</p>
+  <h1>{{ title }}</h1><p class="description">{{ description }}</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+    <label for="email">이메일</label>
+    <input id="email" name="email" type="email" maxlength="254" required autocomplete="email">
+    <button class="button full" type="submit">메일 요청</button>
+  </form>
+  <p class="auth-switch">15분 동안 최대 3회 요청할 수 있습니다.</p>
+  <p class="auth-switch"><a href="{{ url_for('auth.login') }}">로그인으로 돌아가기</a></p>
+</section>
+{% endblock %}

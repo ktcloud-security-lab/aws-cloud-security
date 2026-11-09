@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · 게시판{% endblock %}
+{% block content %}
+<section class="auth-panel">
+  <p class="eyebrow">ACCOUNT</p><h1>{{ title }}</h1><p class="description">{{ message }}</p>
+  {% if action %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+    {% if token %}<input type="hidden" name="token" value="{{ token }}">{% endif %}
+    <button class="button full" type="submit">{{ '인증 완료하기' if action == 'verify' else '로그아웃' }}</button>
+  </form>
+  {% endif %}
+  <p class="auth-switch"><a href="{{ url_for('auth.login') }}">로그인</a> · <a href="{{ url_for('auth.resend_verification') }}">인증 메일 재발송</a> · <a href="{{ url_for('auth.forgot_password') }}">비밀번호 찾기</a></p>
+</section>
+{% endblock %}
