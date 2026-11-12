@@ -12,7 +12,7 @@
     <textarea id="body" name="body" required rows="12">{{ request.form.get('body', p.body) }}</textarea>
     <div class="form-actions">
       <a class="button secondary" href="{{ url_for('posts.post', pid=p.id) }}">취소</a>
-      <button class="button" type="submit">수정 저장</button>
+      <button class="button" type="submit">저장</button>
     </div>
   </form>
 </section>
