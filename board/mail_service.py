@@ -4,7 +4,7 @@ import boto3
 
 SENDER_EMAIL = os.getenv(
     "SES_FROM_EMAIL",
-    "ktcloudsecu404@gmail.com"
+    "reply@team404.kro.kr"
 )
 
 AWS_REGION = "ap-northeast-2"
