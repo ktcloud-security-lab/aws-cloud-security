@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'KT Cloud Security Lab - WAF for existing ALB (SQLi and Core managed rules)'
+
+Parameters:
+  ExistingAlbArn:
+    Type: String
+    Description: 'ARN of existing Application Load Balancer in ap-northeast-2'
+
+  RuleMode:
+    Type: String
+    Default: Count
+    AllowedValues:
+      - Count
+      - Block
+    Description: 'Count for initial testing; Block uses managed rule groups default rule actions'
+
+Conditions:
+  UseCountMode: !Equals [!Ref RuleMode, Count]
+
+Resources:
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: ktcloud-waf-webacl
+      Scope: REGIONAL
+      Description: 'WAF for existing KT Cloud Security project ALB'
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        SampledRequestsEnabled: true
+        MetricName: ktcloud-waf
+      Rules:
+        - Name: SQLiManagedRules
+          Priority: 0
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesSQLiRuleSet
+          OverrideAction: !If [UseCountMode, {Count: {}}, {None: {}}]
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            SampledRequestsEnabled: true
+            MetricName: ktcloud-sqli
+        - Name: CoreManagedRules
+          Priority: 1
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          OverrideAction: !If [UseCountMode, {Count: {}}, {None: {}}]
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            SampledRequestsEnabled: true
+            MetricName: ktcloud-core
+
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Ref ExistingAlbArn
+      WebACLArn: !GetAtt WebACL.Arn
+
+Outputs:
+  WebACLArn:
+    Description: 'Created regional Web ACL ARN'
+    Value: !GetAtt WebACL.Arn
+  SelectedRuleMode:
+    Description: 'Rule mode selected at deploy time'
+    Value: !Ref RuleMode
