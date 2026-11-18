@@ -3,7 +3,6 @@
 {% block content %}
 <a class="back-link" href="{{ url_for('posts.index') }}">← 목록으로</a>
 <article class="article-panel">
-  <p class="eyebrow">POST {{ p.id }}</p>
   <h1>{{ p.title }}</h1>
   <div class="post-meta"><span>{{ p.username }}</span><span>{{ p.created.strftime('%Y.%m.%d %H:%M') if p.created else '-' }}</span></div>
   {# Existing intentional Stored XSS training behavior is preserved. #}
