@@ -9,46 +9,38 @@ bp = Blueprint("posts", __name__)
 @bp.route("/")
 def index():
     keyword = request.args.get("q", "").strip()
-
+    per_page = 10
     if len(keyword) > 100:
         return render_template(
-            "index.html",
-            posts=[],
-            keyword=keyword,
+            "index.html", posts=[], keyword=keyword, total=0,
+            page=1, pages=1, offset=0, page_numbers=[],
             error="검색어는 100자 이하로 입력해 주세요.",
         ), 400
 
-    sql = """
-        SELECT p.id, p.title, p.created, u.username,
-               (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) AS comment_count
-        FROM posts p
-        JOIN users u ON u.id = p.user_id
-    """
+    source = " FROM posts p JOIN users u ON u.id = p.user_id"
     args = ()
-
     if keyword:
-        escaped = (
-            keyword.replace("=", "==")
-            .replace("%", "=%")
-            .replace("_", "=_")
-        )
+        escaped = keyword.replace("=", "==").replace("%", "=%").replace("_", "=_")
         pattern = f"%{escaped}%"
-
-        sql += """
-            WHERE (
-                p.title LIKE %s ESCAPE '='
-                OR p.body LIKE %s ESCAPE '='
-            )
-        """
+        source += " WHERE (p.title LIKE %s ESCAPE '=' OR p.body LIKE %s ESCAPE '=')"
         args = (pattern, pattern)
 
-    sql += " ORDER BY p.id DESC"
-
-    posts = db.query(sql, args)
+    total = db.query("SELECT COUNT(*) AS total" + source, args, one=True)["total"]
+    pages = max(1, (total + per_page - 1) // per_page)
+    requested_page = request.args.get("page", 1, type=int)
+    page = min(max(1, requested_page), pages)
+    offset = (page - 1) * per_page
+    posts = db.query(
+        """SELECT p.id, p.title, p.created, u.username,
+           (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) AS comment_count"""
+        + source + " ORDER BY p.id DESC LIMIT %s OFFSET %s",
+        args + (per_page, offset),
+    )
+    first_page = max(1, min(page - 2, pages - 4))
     return render_template(
-        "index.html",
-        posts=posts,
-        keyword=keyword,
+        "index.html", posts=posts, keyword=keyword, total=total,
+        page=page, pages=pages, offset=offset,
+        page_numbers=range(first_page, min(pages, first_page + 4) + 1),
     )
 
 

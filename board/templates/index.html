@@ -49,13 +49,13 @@
 {% if keyword and not error %}
 <p class="search-summary">
   ‘{{ keyword }}’ 검색 결과
-  <strong>{{ posts|length }}</strong>건
+  <strong>{{ total }}</strong>건
 </p>
 {% endif %}
 
 <section class="board-panel" aria-label="게시글 목록">
   <div class="table-caption">
-    <span>{{ "검색 결과" if keyword else "전체 게시글" }}</span>
+    <span>{{ "검색 결과" if keyword else "전체 게시글" }} <strong>{{ total }}</strong>개</span>
     <span class="subtle">최신 등록순</span>
   </div>
 
@@ -73,7 +73,7 @@
       <tbody>
         {% for p in posts %}
         <tr>
-          <td class="number subtle">{{ p.id }}</td>
+          <td class="number subtle">{{ total - offset - loop.index0 }}</td>
 
           <td class="post-title">
             <a href="{{ url_for('posts.post', pid=p.id) }}">
@@ -106,4 +106,30 @@
     </table>
   </div>
 </section>
+{% if pages > 1 %}
+<nav class="pagination" aria-label="게시글 페이지">
+  {% if page > 1 %}
+  <a href="{{ url_for('posts.index', page=1, q=keyword) }}" aria-label="첫 페이지">&lt;&lt;</a>
+  <a href="{{ url_for('posts.index', page=page-1, q=keyword) }}" rel="prev" aria-label="이전 페이지">&lt;</a>
+  {% else %}
+  <span class="disabled" aria-disabled="true" aria-label="처음 페이지">&lt;&lt;</span>
+  <span class="disabled" aria-disabled="true" aria-label="이전 페이지">&lt;</span>
+  {% endif %}
+  {% for number in page_numbers %}
+    {% if number == page %}
+    <span class="current" aria-current="page">{{ number }}</span>
+    {% else %}
+    <a href="{{ url_for('posts.index', page=number, q=keyword) }}" aria-label="{{ number }}페이지">{{ number }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page < pages %}
+  <a href="{{ url_for('posts.index', page=page+1, q=keyword) }}" rel="next" aria-label="다음 페이지">&gt;</a>
+  <a href="{{ url_for('posts.index', page=pages, q=keyword) }}" aria-label="마지막 페이지">&gt;&gt;</a>
+  {% else %}
+  <span class="disabled" aria-disabled="true" aria-label="다음 페이지">&gt;</span>
+  <span class="disabled" aria-disabled="true" aria-label="마지막 페이지">&gt;&gt;</span>
+  {% endif %}
+</nav>
+<p class="pagination-summary">{{ page }} / {{ pages }} 페이지</p>
+{% endif %}
 {% endblock %}
