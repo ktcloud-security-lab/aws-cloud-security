@@ -507,3 +507,45 @@ textarea {
     flex-basis: 100%;
   }
 }
+/* Registration: keep the username field and availability button on one row. */
+.auth-panel-register {
+  max-width:540px;
+}
+
+.username-controls {
+  display:flex;
+  align-items:stretch;
+  gap:10px;
+}
+
+.username-controls input {
+  flex:1;
+  min-width:0;
+}
+
+.username-controls .button {
+  flex-shrink:0;
+}
+
+.username-controls .button:disabled {
+  opacity:.65;
+  cursor:wait;
+}
+
+.username-message {
+  min-height:21px;
+  margin:8px 0 18px;
+  font-size:13px;
+}
+
+@media (max-width:400px) {
+  .auth-panel-register {
+    padding:28px 16px;
+  }
+  .username-controls {
+    gap:8px;
+  }
+  .username-controls .button {
+    padding:9px 12px;
+  }
+}
