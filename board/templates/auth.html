@@ -20,6 +20,9 @@
       value="{{ request.form.get('username', '') }}"
     >
     {% if title == '회원가입' %}
+    <button class="button" type="button" id="check-username"
+      data-url="{{ url_for('auth.check_username') }}" aria-describedby="username-message">중복 확인</button>
+    <p id="username-message" role="status" aria-live="polite" style="font-size:13px; margin:8px 0 18px;"></p>
     <label for="email">이메일</label>
     <input id="email" name="email" type="email" maxlength="254"
           required autocomplete="email"
@@ -77,6 +80,7 @@
 </section>
 
 {% if title == '회원가입' %}
+<script src="{{ url_for('static', filename='username-check.js') }}" defer></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("auth-form");

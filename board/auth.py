@@ -2,7 +2,7 @@ import hmac
 import secrets
 from functools import wraps
 
-from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, abort, current_app, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import auth_service as service
@@ -119,6 +119,20 @@ def dispatch_link(user, purpose):
         )
 
         return False, '메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.'
+
+
+@bp.route('/check-username', methods=['POST'])
+def check_username():
+    name = request.form.get('username', '').strip()
+    if not name or len(name) > 30:
+        return jsonify(available=False, message='아이디를 1~30자로 입력해 주세요.'), 400
+    try:
+        existing = db.query('SELECT id FROM users WHERE username=%s', (name,), one=True)
+    except Exception:
+        current_app.logger.exception('Username availability lookup failed')
+        return jsonify(available=False, message='확인에 실패했습니다. 잠시 후 다시 시도해 주세요.'), 503
+    return jsonify(available=not bool(existing),
+                   message='이미 사용 중인 아이디입니다.' if existing else '사용 가능한 아이디입니다.')
 
 
 @bp.route('/register', methods=['GET', 'POST'])
