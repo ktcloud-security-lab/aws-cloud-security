@@ -1,0 +1,108 @@
+{
+  "region": "ap-northeast-2",
+  "vpc_id": "vpc-REPLACE_ME",
+  "targets": [
+    {
+      "name": "NAT",
+      "type": "ec2",
+      "id": "i-REPLACE_NAT",
+      "port_policy": {
+        "confirmed": true,
+        "allowed": [
+          {
+            "protocol": "tcp",
+            "from": 80,
+            "to": 80
+          },
+          {
+            "protocol": "tcp",
+            "from": 443,
+            "to": 443
+          },
+          {
+            "protocol": "udp",
+            "from": 123,
+            "to": 123
+          }
+        ]
+      }
+    },
+    {
+      "name": "IPS",
+      "type": "ec2",
+      "id": "i-REPLACE_IPS",
+      "port_policy": {
+        "confirmed": true,
+        "allowed": [
+          {
+            "protocol": "tcp",
+            "from": 80,
+            "to": 80
+          },
+          {
+            "protocol": "tcp",
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    },
+    {
+      "name": "404-web-alb",
+      "type": "alb",
+      "port_policy": {
+        "confirmed": true,
+        "allowed": [
+          {
+            "protocol": "tcp",
+            "from": 80,
+            "to": 80
+          },
+          {
+            "protocol": "tcp",
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    },
+    {
+      "name": "WEB",
+      "type": "ec2",
+      "id": "i-REPLACE_WEB",
+      "port_policy": {
+        "confirmed": true,
+        "allowed": [
+          {
+            "protocol": "tcp",
+            "from": 5000,
+            "to": 5000
+          }
+        ]
+      }
+    },
+    {
+      "name": "DB",
+      "type": "ec2",
+      "id": "i-REPLACE_DB",
+      "port_policy": {
+        "confirmed": true,
+        "allowed": [
+          {
+            "protocol": "tcp",
+            "from": 3306,
+            "to": 3306
+          }
+        ]
+      },
+      "db_policy": {
+        "confirmed": true,
+        "port": 3306,
+        "security_groups": [
+          "sg-REPLACE_WEB"
+        ],
+        "cidrs": []
+      }
+    }
+  ]
+}

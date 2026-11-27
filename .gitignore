@@ -1,0 +1,8 @@
+
+# Network audit generated files
+reports/
+results/
+__pycache__/
+*.pyc
+*.bak
+scripts/approved_rules.json
